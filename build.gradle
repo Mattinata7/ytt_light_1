@@ -1,3 +1,5 @@
+import static org.gradle.jvm.toolchain.JavaLanguageVersion.of
+
 plugins {
     id 'java'
 }
@@ -13,14 +15,18 @@ ext {
     junitVersion = '5.10.2'
 }
 
-sourceCompatibility = '17'
-targetCompatibility = '17'
+java {
+    toolchain {
+        languageVersion = of(17)
+    }
+}
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
 dependencies {
+    implementation("io.github.cdimascio:java-dotenv:5.2.2")
     testImplementation('com.codeborne:selenide:7.6.1')
     testImplementation('org.slf4j:slf4j-simple:2.0.13')
 
