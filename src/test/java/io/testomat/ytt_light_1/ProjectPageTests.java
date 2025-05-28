@@ -1,16 +1,13 @@
 package io.testomat.ytt_light_1;
 
-import com.codeborne.selenide.CollectionCondition;
-import com.codeborne.selenide.Condition;
-import com.codeborne.selenide.ElementsCollection;
-import com.codeborne.selenide.SelenideElement;
+import com.codeborne.selenide.*;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static com.codeborne.selenide.Condition.visible;
+import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selectors.byText;
 import static com.codeborne.selenide.Selenide.*;
 
@@ -26,6 +23,8 @@ public class ProjectPageTests extends BaseTest{
         open(baseUrl);
 
         loginUser(email, password);
+
+        Configuration.headless = false;
     }
 
     @BeforeEach
@@ -52,6 +51,65 @@ public class ProjectPageTests extends BaseTest{
         SelenideElement targetProject = countOfProjectsShouldBeEqualTo(2).first();
 
         countOfTestCasesShouldBeEqualTo(targetProject, 0);
+    }
+
+
+    @Test
+    public void findsManufactureTestomatioProjectWithCountOfTests() {
+
+        searchForProjectManufactureTestomatio();
+        
+        $$("#grid ul li").filter(visible).shouldHave(CollectionCondition.size(1));
+
+        $("[title=\"Manufacture Testomatio\"] p").shouldHave(text("2 tests"));
+        
+        waitingForProjectMTToLoad();
+    }
+
+    @Test
+
+    public void findSmokyTestCountInManufactureTestomatioProject(){
+
+        searchForProjectManufactureTestomatio();
+
+        selectProjectManufactureTestomatio();
+
+        waitingForProjectMTToLoad();
+
+        searchForSmokyTesting();
+
+        SelenideElement smokyTest = countOfSmokyTestsShouldBeEquakTo(2);
+
+        countOfTestsShouldBeEqualTo(smokyTest, "small.text-gray-500", "[^0-9]", 2);
+
+    }
+
+    private static void searchForSmokyTesting() {
+        $("#search").setValue("smoky");
+    }
+
+    private static void countOfTestsShouldBeEqualTo(SelenideElement smokyTest, String s, String regex, int expected) {
+        String testCountText = smokyTest.$(s).getText();
+        String numberFromSmoky = testCountText.replaceAll(regex, "");
+        Integer actualTestCount = Integer.parseInt(numberFromSmoky);
+        Assertions.assertEquals(expected, actualTestCount);
+    }
+
+    @NotNull
+    private static SelenideElement countOfSmokyTestsShouldBeEquakTo(int expectedCount) {
+        return $$(".nestedItem-title").findBy(Condition.text("smoky")).shouldBe(visible);
+    }
+
+    private static void waitingForProjectMTToLoad() {
+        $(Selectors.byText("Manufacture Testomatio")).shouldBe(visible);
+    }
+
+    private static void selectProjectManufactureTestomatio() {
+        $(Selectors.byText("Manufacture Testomatio")).click();
+    }
+
+    private static void searchForProjectManufactureTestomatio() {
+        $("#search").setValue("Manufacture Testomatio");
     }
 
     private static void waitingForProjectToLoad(String targetProjectName) {
